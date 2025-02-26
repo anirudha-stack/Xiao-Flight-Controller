@@ -1,0 +1,43 @@
+Altium Designer Pick and Place Locations
+D:\2025\PCB\XIAO_FlightController\Project Outputs for XIAO_FlightController\Pick Place for XIAO_FlightController.csv
+
+========================================================================================================================
+File Design Information:
+
+Date:       08/02/25
+Time:       15:12
+Revision:   Not in VersionControl
+Variant:    No variations
+Units used: mil
+
+"Designator","Comment","Layer","Footprint","Center-X(mil)","Center-Y(mil)","Rotation","Description"
+"R8","200K","TopLayer","RES0603","3180.000","3250.000","90","0603 RESISTOR"
+"R7","200K","TopLayer","RES0603","3180.000","3140.000","90","0603 RESISTOR"
+"R6","10K","TopLayer","RES0603","3100.000","3040.000","90","0603 SMD RESISTOR"
+"R5","10K","TopLayer","RES0603","3040.000","3040.000","90","0603 SMD RESISTOR"
+"R4","10K","TopLayer","RES0603","2980.000","2900.000","270","0603 SMD RESISTOR"
+"R3","10K","TopLayer","RES0603","3235.000","2920.000","90","0603 SMD RESISTOR"
+"R2","10K","TopLayer","RES0603","3240.000","3250.000","90","0603 SMD RESISTOR"
+"R1","10K","TopLayer","RES0603","2970.000","3250.000","270","0603 SMD RESISTOR"
+"Q4","SI2302","TopLayer","SOT23_N","2868.661","2907.598","180","NPN General-purpose Transistor"
+"Q3","SI2302","TopLayer","SOT23_N","3345.000","2910.000","0","NPN General-purpose Transistor"
+"Q2","SI2302","TopLayer","SOT23_N","3350.000","3245.000","0","NPN General-purpose Transistor"
+"Q1","SI2302","TopLayer","SOT23_N","2865.000","3250.000","180","NPN General-purpose Transistor"
+"PWR","RT9193-33GB","TopLayer","SOT94P279X129-5N","3075.000","3235.000","270","Linear Voltage Regulator IC Positive Fixed 1 Output 300mA TSOT-23-5"
+"MCU","102010428","BottomLayer","MODULE_102010428","3106.102","3065.000","180","RP2040 XIAO RP2040 series ARM® Cortex®-M0+ MCU 32-Bit Embedded Evaluation Board"
+"IMU","LSM6DS3TR","TopLayer","PQFN50P300X250X86-14N","3079.685","2921.417","0","Accelerometer, Gyroscope, Temperature, 6 Axis Sensor I²C, SPI Output"
+"F","Ferrite Bead SMD","TopLayer","FB0603","3081.457","3125.000","180","Ferrite Bead SMD"
+"D4","1N4148","TopLayer","Diode_1n4148_SMD","2884.961","2795.000","0","General Semicoductor"
+"D3","1N4148","TopLayer","Diode_1n4148_SMD","3324.961","2790.000","180","General Semicoductor"
+"D2","1N4148","TopLayer","Diode_1n4148_SMD","3324.961","3370.000","180","General Semicoductor"
+"D1","1N4148","TopLayer","Diode_1n4148_SMD","2890.039","3370.000","0","General Semicoductor"
+"C10","100nF","TopLayer","CAP0603","3180.000","2910.000","270","0603 CAPACITOR"
+"C9","10uF","TopLayer","CAP0603","2980.000","3040.000","90","0603 CAPACITOR"
+"C8","10uF","TopLayer","CAP0603","3020.000","2795.000","270","0603 CAPACITOR"
+"C7","10uF","TopLayer","CAP0603","3075.000","2795.000","270","0603 CAPACITOR"
+"C6","10uF","TopLayer","CAP0603","3130.000","2795.000","270","0603 CAPACITOR"
+"C5","10uF","TopLayer","CAP0603","3185.000","2795.000","270","0603 CAPACITOR"
+"C4","10uF","TopLayer","CAP0603","3190.000","3375.000","270","0603 CAPACITOR"
+"C3","10uF","TopLayer","CAP0603","3135.000","3375.000","270","0603 CAPACITOR"
+"C2","10uF","TopLayer","CAP0603","3030.000","3375.000","270","0603 CAPACITOR"
+"C1","10uF","TopLayer","CAP0603","3085.000","3375.000","270","0603 CAPACITOR"
