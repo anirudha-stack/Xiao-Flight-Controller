@@ -77,7 +77,8 @@ void testBatteryADC() {
     Serial.println("Testing Battery ADC...");
     pinMode(BATTERY_ADC, INPUT);
     int adcValue = analogRead(BATTERY_ADC);
-    float voltage = (adcValue / 4095.0) * 3.3 * ((200 + 200) / 200.0); // Voltage divider scaling
+    float calibrationFactor = 3.11 / 3.44; // Adjust based on real measurements
+    float voltage = (adcValue / 4095.0) * 3.3 * ((200 + 200) / 200.0) * calibrationFactor;
     Serial.print("Battery Voltage: ");
     Serial.print(voltage);
     Serial.println("V");
