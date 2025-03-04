@@ -1,16 +1,13 @@
 #include "imu.h"
+#include <math.h>
 
 // Create a single instance of the LSM6DS3
 LSM6DS3 flightIMU(I2C_MODE, 0x6A);
 
-// We'll track Roll, Pitch, Yaw in degrees
-static float g_roll  = 0.0f;
-static float g_pitch = 0.0f;
-static float g_yaw   = 0.0f;  // drift-only for demonstration, no magnetometer-based correction
-
-// Define our two Kalman filters (one for roll, one for pitch)
- KalmanFilter kfRoll;
- KalmanFilter kfPitch;
+// Complementary Filter Variables
+static float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
+static float gyroBiasX = 0.0f, gyroBiasY = 0.0f, gyroBiasZ = 0.0f;
+static float alpha = 0.98f; // Adaptive filter coefficient
 
 //----------------------------------------------------
 // IMU INIT & PRINT
@@ -49,98 +46,39 @@ void printImuValues() {
 }
 
 //----------------------------------------------------
-// KALMAN FILTER CORE
+// COMPLEMENTARY FILTER FUNCTIONS
 //----------------------------------------------------
-
-// Initializes the Kalman filter structure
-void initKalmanFilter(KalmanFilter &kf, float Q_angle, float Q_bias, float R_measure) {
-  kf.angle = 0.0f;
-  kf.bias = 0.0f;
-  
-  // Error covariance matrix
-  kf.P[0][0] = 0.0f;
-  kf.P[0][1] = 0.0f;
-  kf.P[1][0] = 0.0f;
-  kf.P[1][1] = 0.0f;
-
-  // Tunable parameters
-  kf.Q_angle   = Q_angle;
-  kf.Q_bias    = Q_bias;
-  kf.R_measure = R_measure;
+float computeAdaptiveAlpha(float ax, float ay, float az) {
+    float accMagnitude = sqrt(ax * ax + ay * ay + az * az);
+    return constrain(0.98f - (accMagnitude - 1.0f) * 0.02f, 0.90f, 0.98f);
 }
 
-// Performs a single Kalman filter predict/update cycle
-float kalmanGetAngle(KalmanFilter &kf, float newAngle, float newRate, float dt) {
-  // 1. PREDICTION STEP
-  // Update the angle using the gyroscope rate minus our current bias
-  float rate = newRate - kf.bias;
-  kf.angle += dt * rate;
+void updateIMUAngles(float dt) {
+    float gx = flightIMU.readFloatGyroX();
+    float gy = flightIMU.readFloatGyroY();
+    float gz = flightIMU.readFloatGyroZ();
+    float ax = flightIMU.readFloatAccelX();
+    float ay = flightIMU.readFloatAccelY();
+    float az = flightIMU.readFloatAccelZ();
 
-  // Update the error covariance matrix
-  // P = P + Q
-  kf.P[0][0] += dt * (dt*kf.P[1][1] - kf.P[0][1] - kf.P[1][0] + kf.Q_angle);
-  kf.P[0][1] -= dt * kf.P[1][1];
-  kf.P[1][0] -= dt * kf.P[1][1];
-  kf.P[1][1] += kf.Q_bias * dt;
+    //alpha = computeAdaptiveAlpha(ax, ay, az);
+    alpha =0.98;
 
-  // 2. UPDATE STEP
-  // Our measurement is newAngle from the accelerometer
-  float S = kf.P[0][0] + kf.R_measure; // Estimate error
-  float K0 = kf.P[0][0] / S;          // Kalman gain for angle
-  float K1 = kf.P[1][0] / S;          // Kalman gain for bias
 
-  // Y (innovation) = z - H*x  (where z is newAngle, H*x is predicted angle)
-  float y = newAngle - kf.angle;
+    float accRoll = atan2(ay, az) * 180.0f / M_PI;
+    float accPitch = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0f / M_PI;
 
-  // Update angle, bias with innovation
-  kf.angle += K0 * y;
-  kf.bias  += K1 * y;
-
-  // Update error covariance matrix
-  float P00_temp = kf.P[0][0];
-  float P01_temp = kf.P[0][1];
-
-  kf.P[0][0] -= K0 * P00_temp;
-  kf.P[0][1] -= K0 * P01_temp;
-  kf.P[1][0] -= K1 * P00_temp;
-  kf.P[1][1] -= K1 * P01_temp;
-
-  return kf.angle;
+    roll = alpha * (roll + (gx - gyroBiasX) * dt) + (1 - alpha) * accRoll;
+    pitch = alpha * (pitch + (gy - gyroBiasY) * dt) + (1 - alpha) * accPitch;
+    yaw += (gz - gyroBiasZ) * dt;
 }
 
-//----------------------------------------------------
-// UPDATE ORIENTATION (ROLL, PITCH, YAW)
-//----------------------------------------------------
-void updateIMUAnglesWithKalman(float dt) {
-  // 1. Read raw data
-  float gx = flightIMU.readFloatGyroX();   // deg/sec
-  float gy = flightIMU.readFloatGyroY();   // deg/sec
-  float gz = flightIMU.readFloatGyroZ();   // deg/sec
-  float ax = flightIMU.readFloatAccelX();  // g
-  float ay = flightIMU.readFloatAccelY();  // g
-  float az = flightIMU.readFloatAccelZ();  // g
-
-  // 2. Compute angles from accelerometer (roll, pitch)
-  // Adjust signs/orientations if your sensor axis differs
-  float accRoll  = atan2(ay, az) * 180.0f / PI;
-  float accPitch = atan2(-ax, sqrt(ay*ay + az*az)) * 180.0f / PI;
-  
-  // 3. Predict + update step for ROLL
-  g_roll = kalmanGetAngle(kfRoll, accRoll, gx, dt);
-
-  // 4. Predict + update step for PITCH
-  g_pitch = kalmanGetAngle(kfPitch, accPitch, gy, dt);
-
-  // 5. For YAW we have no absolute reference, so we just integrate
-  //    This will drift over time without a magnetometer
-  g_yaw += gz * dt; // rudimentary approach
+void getAngles(float &r, float &p, float &y) {
+    r = roll;
+    p = pitch;
+    y = yaw;
 }
 
-//----------------------------------------------------
-// GET THE FILTERED ANGLES
-//----------------------------------------------------
-void getAngles(float &roll, float &pitch, float &yaw) {
-  roll  = g_roll;
-  pitch = g_pitch;
-  yaw   = g_yaw;
+void resetYaw() {
+    yaw = 0.0f;
 }
